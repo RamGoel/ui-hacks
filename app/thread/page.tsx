@@ -1,15 +1,14 @@
 'use client'
-import { categories } from "@/lib/data";
-import { useState, useMemo, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { CategoriesSidebar } from "@/components/CategoriesSidebar";
+import { NewThreadForm } from "@/components/NewThreadForm";
+import { Thread } from "@/components/Thread";
+import { categories, threads as threadsData } from "@/lib/data";
 import { useForumStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { CategoriesSidebar } from "@/components/CategoriesSidebar";
-import { ChevronDown, ArrowDownAZ, Flame, ThumbsUp, Search, X, Newspaper } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { Thread } from "@/components/Thread";
-import { NewThreadForm } from "@/components/NewThreadForm";
-import { threads as threadsData } from "@/lib/data";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowDownAZ, ChevronDown, Flame, Search, ThumbsUp, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 const ThreadSkeleton = () => {
   return (
@@ -93,6 +92,26 @@ export default function Home() {
     }
     return sorted;
   }, [filteredThreads, sortBy]);
+
+
+  if(isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-8">
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <h2 className="text-xl font-semibold text-slate-900 mb-4">Fetching threads...</h2>
+                <ThreadSkeleton />
+                <ThreadSkeleton />
+                <ThreadSkeleton />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -224,35 +243,21 @@ export default function Home() {
                 <NewThreadForm closeForm={() => setShowNewThreadForm(false)} />
               )}
 
-              <div className="divide-y divide-slate-200">
+              <div className="divide-y min-h-[500px] divide-slate-200">
                 <AnimatePresence>
-                  {isLoading ? (
-                    <>
-                      {[...Array(5)].map((_, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, filter: "blur(10px)" }}
-                          animate={{ opacity: 1, filter: "blur(0px)" }}
-                          exit={{ opacity: 0, height: 0, filter: "blur(10px)" }}
-                          transition={{ duration: 0.5, delay: index * 0.1 }}
-                        >
-                          <ThreadSkeleton />
-                        </motion.div>
-                      ))}
-                    </>
-                  ) : (
+                  {
                     sortedThreads.filter(thread => !thread.parentId).map((thread) => (
                       <motion.div
                         key={thread.id}
-                        initial={{ opacity: 0, y: 50, filter: "blur(10px)" }}
-                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                        exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
+                        initial={{ opacity: 0, filter: "blur(10px)" }}
+                        animate={{ opacity: 1, filter: "blur(0px)" }}
+                        exit={{ opacity: 0, filter: "blur(10px)" }}
                         transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
                       >
                         <Thread thread={thread} />
                       </motion.div>
                     ))
-                  )}
+                  }
                 </AnimatePresence>
               </div>
             </div>
